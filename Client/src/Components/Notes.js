@@ -8,7 +8,7 @@ import moment from 'moment'
 import { v4 as uuid } from 'uuid'
 import SearchContext from '../Context/Search'
 import Modal from './Modal'
-
+// import Mark from 'mark.js'
 const Notes = () => {
 
   const [loading, setLoading] = useState(false)
@@ -37,15 +37,20 @@ const Notes = () => {
   // }
 
   useEffect(() => {
+    // const instance = new Mark(document.getElementsByClassName('notes-wrapper')[0])
+    // const instance = new Mark(document.getElementsByClassName('note-titles')[0])
+    // setSearchNotes(null)
+    // instance.unmark()
     if (searchValue) {
-
-      let searchResults = notes.filter(item => item.title.toLowerCase().includes(searchValue) || item.description.toLowerCase().includes(searchValue));
+      let searchResults = notes.filter(item => item.title.trim().toLowerCase().includes(searchValue.trim().toLowerCase()) || item.description.trim().toLowerCase().includes(searchValue.trim().toLowerCase()));
       setSearchNotes(searchResults)
+      // instance.mark(searchValue.trim().toLowerCase())
     }
     // eslint-disable-next-line
   }, [searchValue])
 
   const addNewNote = () => {
+    setActiveNote(null);
     const dateTime = new Date()
     const newNoteId = uuid()
     const newNote = {
@@ -65,12 +70,13 @@ const Notes = () => {
     setActiveNote(newNote)
   }
 
-  // const saveNote = () => {
-  //   const newNotes = notes.filter(note => note.id !== activeNote.id)
+  const saveNote = () => {
+    // const newNotes = notes.filter(note => note.id !== activeNote.id)
 
-  //   setNotes([...newNotes, { ...activeNote, modified: new Date() }])
-  //   setActiveNote(null)
-  // }
+    // setNotes([...newNotes, { ...activeNote, modified: new Date() }])
+    // setActiveNote(null)
+    console.log("Save note: ", JSON.stringify(activeNote))
+  }
   const handDelete = (e, noteId) => {
     e.stopPropagation()
     setModal({ show: true, noteId: noteId })
@@ -88,7 +94,7 @@ const Notes = () => {
 
   // const element = notesRef.current
   // element.addEventListener('scroll', ()=> console.log("Div scrolling"))
-  
+
   const closeModal = () => {
     setModal({ show: false, noteId: null })
   }
@@ -167,7 +173,8 @@ const Notes = () => {
                     <i className="fa fa-sticky-note-o editor-title-note-image"></i> Notes</span>
               }
               <div className='btns'>
-                <button className="new-note" onClick={addNewNote}>New Note</button>
+                {<button className="new-note" onClick={addNewNote}>New Note</button>}
+                {activeNote && <button className="new-note" onClick={saveNote}>Save Note</button>}
               </div>
             </div>
             <div className="current-note-editor">

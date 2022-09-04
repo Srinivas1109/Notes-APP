@@ -8,6 +8,7 @@ import {
 import Notes from "./Components/Notes";
 import SearchContext from "./Context/Search";
 import { useState } from "react"
+import Login from "./Components/Login";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route path="/all-notes" element={<Notes />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </SearchContext.Provider>
       </Router>
