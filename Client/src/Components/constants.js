@@ -1,4 +1,5 @@
-const HOST_URL = "http://localhost:5000"
+// const HOST_URL = "http://localhost:5000"
+const HOST_URL = "https://my-keep-notes.herokuapp.com/"
 
 const CREATE_ACCOUNT_URL = "/api/create/"
 
