@@ -6,28 +6,35 @@ import {
   Route,
 } from "react-router-dom";
 import Notes from "./Components/Notes";
-import SearchContext from "./Context/Search";
-import { useState } from "react"
 import Login from "./Components/Login";
+import Signup from "./Components/Signup";
+import { AuthProvider } from "./Context/AuthContext";
+import PrivateNote from "./PrivateRoutes/PrivateNote";
 
 
 function App() {
-  const [searchValue, setSearchValue] = useState('')
-  const variables = {
-    searchValue,
-    setSearchValue
-  }
+
+  // const [searchValue, setSearchValue] = useState('')
+  // const searchVariables = {
+  //   searchValue,
+  //   setSearchValue
+  // }
+
+  // const []
   return (
     <div className="App">
       <Router>
-        <SearchContext.Provider value={variables}>
+        <AuthProvider>
           <Navbar />
           <Routes>
+            <Route element={<PrivateNote />}>
+              <Route path="/all-notes" element={<Notes />} />
+            </Route>
             <Route exact path="/" element={<Home />} />
-            <Route path="/all-notes" element={<Notes />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/create" element={<Signup />} />
           </Routes>
-        </SearchContext.Provider>
+        </AuthProvider>
       </Router>
     </div>
   );

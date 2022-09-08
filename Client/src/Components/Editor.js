@@ -54,7 +54,7 @@ export default function Editor(props) {
             quill.on('text-change', () => {
                 props.setActiveNote((prev) => {
                     props.setNotes(prevNotes => {
-                        const newNotes = prevNotes.filter(note => note.id !== prev.id)
+                        const newNotes = prevNotes.filter(note => note._id !== prev._id)
                         return [{ ...prev, title: prev.title, description: quill.root.innerHTML, modified: new Date() }, ...newNotes]
                     })
                     return {
@@ -65,7 +65,7 @@ export default function Editor(props) {
             });
         }
         // eslint-disable-next-line
-    }, [quill, props.activeNote.id])
+    }, [quill, props.activeNote._id])
 
     return (
         <div className='text-editor-container'>

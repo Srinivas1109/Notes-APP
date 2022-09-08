@@ -43,13 +43,20 @@ nav ul li a {
 
 .nav-search {
     border: none;
+    /* outline: none; */
     margin: 0 2px 0 0;
     padding: 0.5vw 1vw;
-    width: 20vw;
+    width: 13.9vw;
     border-radius: 5px;
-    color: var(--main-headings);
+    color: var(--white);
     font-size: 1.8vh;
     font-weight: 600;
+    /* background-color: var(--main-headings); */
+    background-color: var(--main-headings);
+}
+
+.nav-search::placeholder{
+    color: var(--white);
 }
 
 .nav-search:focus {
@@ -75,4 +82,12 @@ nav ul li a {
 .nav-title {
     color: var(--main-headings);
     font-weight: 900;
+}
+
+.input-search{
+    display: inline-block;
+    width: 100%;
+    /* border: 2px solid red; */
+    background-color: var(--main-headings);
+    height: 5.2vh;
 }

@@ -1,25 +1,20 @@
-import React, { useContext, useState } from 'react'
-// import auth_details from './auth'
-// import { gapi } from 'gapi-script'
-// import { GoogleLogin } from 'react-google-login'
+import React, { useEffect, useState } from 'react'
+import auth_details from './auth'
+import { gapi } from 'gapi-script'
+import { GoogleLogin } from 'react-google-login'
 import "../Styles/Login.css"
-import AuthContext from '../Context/AuthContext'
-import { Link } from 'react-router-dom'
-import { SIGNUP_URL_FRONTEND } from './constants'
+import { CREATE_ACCOUNT_URL, HOST_URL, LOGIN_URL_FRONTEND } from './constants'
+import { Link, useNavigate } from 'react-router-dom'
 // import jwt_decode from 'jwt-decode'
 
-const Login = () => {
-
-    const { loginUser } = useContext(AuthContext)
-
+const Signup = () => {
+    const navigateTo = useNavigate()
     const [credentials, setCredentials] = useState({
-        username: "", password: ""
+        username: "", password: "", email: ""
     })
-
     const handleChange = (e) => {
         const { name, value } = e.target
         setCredentials((prev) => {
-            // console.log(name, value)
             return {
                 ...prev, [name]: value
             }
@@ -27,22 +22,27 @@ const Login = () => {
     }
     const handleSubmit = async (e) => {
         e.preventDefault()
-        loginUser(credentials)
         // console.log(credentials)
-        // let response = await fetch(`${HOST_URL}${LOGIN_URL}`, {
-        //     method: "POST",
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({
-        //         username: credentials.username,
-        //         password: credentials.password
-        //     })
-        // })
+        let response = await fetch(`${HOST_URL}${CREATE_ACCOUNT_URL}`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: credentials.username,
+                password: credentials.password,
+                email: credentials.email,
+            })
+        })
 
-        // response = await response.json()
-        // console.log(response)
+        response = await response.json()
+        console.log(response)
+        if(response.status === 200){
+            navigateTo(`${LOGIN_URL_FRONTEND}`)
+        }else{
+            alert("Something went wrong in signing up")
+        }
 
     }
     // const [result, setResult] = useState(null)
@@ -83,6 +83,38 @@ const Login = () => {
                 {result && <div>{result}</div>}
             </div> */}
             {/* <form onSubmit={handleSubmit} className='form-container' autoComplete="off">
+                <h1 className='text-center'>Sign Up</h1>
+                <div className='input-container'>
+                    <input className='input-box' autoComplete="false" type="text" name="username" placeholder='Username' value={credentials.username} onChange={handleChange} />
+                </div>
+                <div className='input-container'>
+                    <input className='input-box' autoComplete="false" type="email" name="email" placeholder='Email' value={credentials.email} onChange={handleChange} />
+                </div>
+                <div className='input-container'>
+                    <input className='input-box' autoComplete="new-password" type="password" name="password" placeholder='Password' value={credentials.password} onChange={handleChange} />
+                </div>
+                <div className='input-container'>
+                    <input className='input-box' type='submit' onClick={handleSubmit} value="Sign Up" />
+                </div>
+            </form> */}
+
+            <div className='login-container'>
+            {/* <GoogleLogin
+                clientId={auth_details.web.client_id}
+                buttonText="Sign in with Google"
+                onSuccess={onSuccess}
+                onFailure={onFailure}
+                cookiePolicy={'single_host_origin'}
+                isSignedIn={true}
+            />
+            <br />
+            <br />
+            <br />
+            <div>
+
+                {result && <div>{result}</div>}
+            </div> */}
+            {/* <form onSubmit={handleSubmit} className='form-container' autoComplete="off">
                 <h1 className='text-center'>Login</h1>
                 <div className='input-container'>
                     <input className='input-box' autoComplete="off" type="text" name="username" placeholder='Username' value={credentials.username} onChange={handleChange} />
@@ -98,11 +130,16 @@ const Login = () => {
             
             <div className="wrapper">
                 <div className="inner-warpper text-center">
-                    <h2 className="title">Login to your account</h2>
+                    <h2 className="title">Create Account</h2>
                     <form action="" id="formvalidate" onSubmit={handleSubmit}>
                         <div className="input-group">
                             {/* <label className="palceholder" for="userName">User Name</label> */}
                             <input className="form-control" name="username" id="userName" type="text" placeholder="Username" onChange={handleChange} value={credentials.username}/>
+                            <span className="lighting"></span>
+                        </div>
+                        <div className="input-group">
+                            {/* <label className="palceholder" for="userName">User Name</label> */}
+                            <input className="form-control" name="email" id="email" type="email" placeholder="Email" onChange={handleChange} value={credentials.email}/>
                             <span className="lighting"></span>
                         </div>
                         <div className="input-group">
@@ -111,7 +148,7 @@ const Login = () => {
                             <span className="lighting"></span>
                         </div>
 
-                        <input className='submitBtn' type="submit" id="login" value="Login" onSubmit={handleSubmit}/>
+                        <input className='submitBtn' type="submit" id="login" value="Create" onSubmit={handleSubmit}/>
                         <div className="clearfix supporter">
                             <div className="pull-left remember-me">
                                 {/* <input id="rememberMe" type="checkbox" /> */}
@@ -122,11 +159,12 @@ const Login = () => {
                     </form>
                 </div>
                 <div className="signup-wrapper text-center">
-                    <Link to={`${SIGNUP_URL_FRONTEND}`}>Don't have an accout? <span className="text-primary">Create One</span></Link>
+                    <Link to={`${LOGIN_URL_FRONTEND}`}>Already have an accout? <span className="text-primary">Login</span></Link>
                 </div>
             </div>
+        </div>
         </div>
     )
 }
 
-export default Login
+export default Signup

@@ -3,59 +3,69 @@ import "../Styles/Notes.css"
 import Note from './Note'
 import Loader from './Loader'
 import Editor from './Editor'
-import data from "./FakeData"
+// import data from "./FakeData"
 import moment from 'moment'
 import { v4 as uuid } from 'uuid'
-import SearchContext from '../Context/Search'
 import Modal from './Modal'
+import AuthContext from '../Context/AuthContext'
+import { HOST_URL, USER_NOTES_ADD_URL, USER_NOTES_URL } from './constants'
 // import Mark from 'mark.js'
 const Notes = () => {
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true) // later to true
   // eslint-disable-next-line
-  const [notes, setNotes] = useState(data)
+  // const [notes, setNotes] = useState(data)
+  const { user } = useContext(AuthContext)
+  const [notes, setNotes] = useState(null)
   const [activeNote, setActiveNote] = useState(null)
-  const { searchValue } = useContext(SearchContext)
-  const [searchNotes, setSearchNotes] = useState(null)
+  const [searchValue, setSearchValue] = useState('')
+  // const [searchNotes, setSearchNotes] = useState(null)
   const [modal, setModal] = useState({ show: false, noteId: null })
   const notesRef = useRef(null)
 
-  // useEffect(() => {
-  //   getData()
-  // }, [])
-
-  // const getData = async () => {
-  //   try {
-  //     const res = await fetch("https://dummyjson.com/todos")
-  //     const data = await res.json()
-  //     // setTodos(data.todos)
-  //     // console.log(data.todos)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  //   setLoading(false)
-  // }
-
   useEffect(() => {
-    // const instance = new Mark(document.getElementsByClassName('notes-wrapper')[0])
-    // const instance = new Mark(document.getElementsByClassName('note-titles')[0])
-    // setSearchNotes(null)
-    // instance.unmark()
-    if (searchValue) {
-      let searchResults = notes.filter(item => item.title.trim().toLowerCase().includes(searchValue.trim().toLowerCase()) || item.description.trim().toLowerCase().includes(searchValue.trim().toLowerCase()));
-      setSearchNotes(searchResults)
-      // instance.mark(searchValue.trim().toLowerCase())
-    }
+    // console.log("User: ", user)
+    getData()
     // eslint-disable-next-line
-  }, [searchValue])
+  }, [])
+
+  const getData = async () => {
+    try {
+      let response = await fetch(
+        `${HOST_URL}${USER_NOTES_URL}`,
+        {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            {
+              id: user?._id
+            }
+          )
+        }
+      )
+      response = await response.json()
+      // console.log(response)
+      if (response.status === 200) {
+        // console.log("response: ", response.notes.notes)
+        setNotes(response.notes.notes)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    setLoading(false)
+  }
+
+  const handleSearchValue = (e) => {
+    setSearchValue(e.target.value)
+  }
 
   const addNewNote = () => {
     setActiveNote(null);
     const dateTime = new Date()
     const newNoteId = uuid()
     const newNote = {
-      userId: '',
-      id: newNoteId,
+      user: user._id,
+      _id: newNoteId,
       title: `Untitled ${moment().format('LLL')}`,
       // title: `Title${notes.length + 1}`,
       description: '',
@@ -70,12 +80,42 @@ const Notes = () => {
     setActiveNote(newNote)
   }
 
-  const saveNote = () => {
+  const saveNote = async () => {
     // const newNotes = notes.filter(note => note.id !== activeNote.id)
 
     // setNotes([...newNotes, { ...activeNote, modified: new Date() }])
     // setActiveNote(null)
     console.log("Save note: ", JSON.stringify(activeNote))
+    try {
+      const res = await fetch(`${HOST_URL}${USER_NOTES_ADD_URL}`,
+        {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            {
+              "user": user._id,
+              "_id": activeNote._id,
+              "title": activeNote.title,
+              "description": activeNote.description
+            }
+          )
+        })
+      const data = await res.json()
+      if (data.status !== 200) {
+        console.log(data)
+        alert("Something went wrong notes cannot be added")
+      }else{
+        // activeNote._id = data.note._id
+        setNotes((prevNotes)=>{
+          const newNotes = prevNotes.filter(note => note._id !== activeNote._id)
+          return [data.note, ...newNotes]
+        })
+        setActiveNote(data.note)
+      }
+
+    } catch (error) {
+      console.log("Notes Add Error: ", error)
+    }
   }
   const handDelete = (e, noteId) => {
     e.stopPropagation()
@@ -102,7 +142,7 @@ const Notes = () => {
   const handleOnChangeTitle = (e) => {
     setActiveNote((prev) => {
       setNotes(prevNotes => {
-        const newNotes = prevNotes.filter(note => note.id !== prev.id)
+        const newNotes = prevNotes.filter(note => note._id !== prev._id)
         return [{ ...prev, title: e.target.value }, ...newNotes]
       })
       return {
@@ -111,26 +151,35 @@ const Notes = () => {
     })
   }
 
-  const noteElements = notes && notes.map((note, index) => (
+  const noteElements = notes && notes?.filter(
+    item => {
+      if (searchValue) {
+
+        return item.title.trim().toLowerCase().includes(searchValue.trim().toLowerCase()) || item.description.trim().toLowerCase().includes(searchValue.trim().toLowerCase())
+      }else{
+        return item
+      }
+    }
+  ).map((note, index) => (
     <Note
       key={index}
       note={note}
       index={index}
       setActiveNote={setActiveNote}
       deleteNote={handDelete}
-      activeNoteId={activeNote ? activeNote.id : null}
+      activeNoteId={activeNote ? activeNote._id : null}
       notes={notes}
     />))
 
-  const searchResults = searchNotes && searchNotes.map((note, index) => (
-    <Note
-      key={index}
-      note={note}
-      index={index}
-      setActiveNote={setActiveNote}
-      deleteNote={handDelete}
-      activeNoteId={activeNote ? activeNote.id : null}
-    />))
+  // const searchResults = searchNotes && searchNotes.map((note, index) => (
+  //   <Note
+  //     key={index}
+  //     note={note}
+  //     index={index}
+  //     setActiveNote={setActiveNote}
+  //     deleteNote={handDelete}
+  //     activeNoteId={activeNote ? activeNote._id : null}
+  //   />))
 
 
   return (
@@ -153,8 +202,14 @@ const Notes = () => {
       <div className='user-all-notes'>
         <div className="notes-container">
           <div className="note-titles" ref={notesRef}>
-            {noteElements.length === 0 && <div className='no-note-titles'><span className='no-note-titles-text'>No Notes</span></div>}
-            {(searchResults && searchResults.length) > 0 ? searchResults : noteElements}
+            <div className="input-search">
+              <input type="text" id='nav-search' name="nav-search" placeholder='Search notes here...' className='nav-search' value={searchValue} onChange={handleSearchValue} />
+              <label htmlFor="nav-search"><i className="fa fa-search" style={{ fontSize: "20px", color: "gray", cursor: "pointer" }}></i></label>
+              <hr />
+            </div>
+            {noteElements ? null : <div className='no-note-titles'><span className='no-note-titles-text'>No Notes</span></div>}
+            {/* {(searchResults && searchResults.length) > 0 ? searchResults : noteElements} */}
+            {noteElements}
           </div>
           <div className="note-edit">
             <div className="current-note-title">

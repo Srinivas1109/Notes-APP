@@ -13,13 +13,13 @@ const Note = (props) => {
   return (
 
     <div
-      className={`note-container ${props.activeNoteId === props.note.id ? "current-editing" : ''}`}
+      className={`note-container ${props.activeNoteId === props.note._id ? "current-editing" : ''}`}
       onClick={() => handleOnNoteClick(props.note)}>
       <div className="note-title">
         <span><i className="fa fa-sticky-note-o title-note-image"></i>
           {props.note.title}
         </span>
-        <i className="fa fa-trash delete-note-icon" onClick={(e) => { props.deleteNote(e, props.note.id) }}></i>
+        <i className="fa fa-trash delete-note-icon" onClick={(e) => { props.deleteNote(e, props.note._id) }}></i>
       </div>
       <div className="note-description" >
         {noTagData.length > 30 ? noTagData.slice(0, 30) + "..." : noTagData}
